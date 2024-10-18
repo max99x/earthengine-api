@@ -11,7 +11,7 @@ import datetime
 import json
 import os
 import re
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
+from typing import Any, Callable, Optional, Sequence, Union
 import warnings
 
 import google_auth_httplib2
@@ -54,10 +54,10 @@ class _Http:
       uri: str,
       method: str = 'GET',
       body: Optional[str] = None,
-      headers: Optional[Dict[str, str]] = None,
+      headers: Optional[dict[str, str]] = None,
       redirections: Optional[int] = None,
-      connection_type: Optional[Type[Any]] = None,
-  ) -> Tuple[httplib2.Response, Any]:
+      connection_type: Optional[type[Any]] = None,
+  ) -> tuple[httplib2.Response, Any]:
     """Makes an HTTP request using httplib2 semantics."""
     del connection_type  # Ignored
     del redirections  # Ignored
@@ -84,7 +84,7 @@ class _Http:
 
 
 def _wrap_request(
-    headers_supplier: Callable[[], Dict[str, Any]],
+    headers_supplier: Callable[[], dict[str, Any]],
     response_inspector: Callable[[Any], None],
 ) -> Callable[..., http.HttpRequest]:
   """Builds a callable that wraps an API request.
@@ -146,7 +146,7 @@ def build_cloud_resource(
     api_key: Optional[str] = None,
     credentials: Optional[Any] = None,
     timeout: Optional[float] = None,
-    headers_supplier: Optional[Callable[[], Dict[str, Any]]] = None,
+    headers_supplier: Optional[Callable[[], dict[str, Any]]] = None,
     response_inspector: Optional[Callable[[Any], None]] = None,
     http_transport: Optional[Any] = None,
     raw: Optional[bool] = False,
@@ -252,12 +252,12 @@ def build_cloud_resource_from_document(
 
 
 def _convert_dict(
-    to_convert: Dict[str, Any],
-    conversions: Dict[str, Any],
-    defaults: Optional[Dict[str, Any]] = None,
+    to_convert: dict[str, Any],
+    conversions: dict[str, Any],
+    defaults: Optional[dict[str, Any]] = None,
     key_warnings: bool = False,
     retain_keys: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
   """Applies a set of conversion rules to a dict.
 
   Args:
@@ -290,7 +290,7 @@ def _convert_dict(
     The "to_convert" dict with keys renamed, values converted, and defaults
     added.
   """
-  result: Dict[str, Any] = {}
+  result: dict[str, Any] = {}
   for key, value in to_convert.items():
     if key in conversions:
       conversion = conversions[key]
@@ -315,7 +315,7 @@ def _convert_dict(
 
 
 def _convert_value(
-    value: str, conversions: Dict[str, Any], default: Any) -> Any:
+    value: str, conversions: dict[str, Any], default: Any) -> Any:
   """Converts a value using a set of value mappings.
 
   Args:
@@ -374,7 +374,7 @@ def _convert_bounding_box_to_geo_json(bbox: Sequence[float]) -> str:
               lng_min, lat_min, lng_max, lat_max))
 
 
-def convert_get_list_params_to_list_assets_params(params) -> Dict[str, Any]:
+def convert_get_list_params_to_list_assets_params(params) -> dict[str, Any]:
   """Converts a getList params dict to something usable with listAssets."""
   params = _convert_dict(
       params, {
@@ -393,7 +393,7 @@ def convert_get_list_params_to_list_assets_params(params) -> Dict[str, Any]:
   return convert_list_images_params_to_list_assets_params(params)
 
 
-def convert_list_assets_result_to_get_list_result(result) -> List[Any]:
+def convert_list_assets_result_to_get_list_result(result) -> list[Any]:
   """Converts a listAssets result to something getList can return."""
   if 'assets' not in result:
     return []
@@ -444,8 +444,8 @@ def _convert_list_images_filter_params_to_list_assets_params(params) -> str:
 
 
 def convert_list_images_params_to_list_assets_params(
-    params: Dict[str, Any]
-) -> Dict[str, Any]:
+    params: dict[str, Any]
+) -> dict[str, Any]:
   """Converts a listImages params dict to something usable with listAssets."""
   params = params.copy()
   extra_filters = _convert_list_images_filter_params_to_list_assets_params(
@@ -462,14 +462,14 @@ def is_asset_root(asset_name: str) -> bool:
   return bool(re.match(ASSET_ROOT_PATTERN, asset_name))
 
 
-def convert_list_images_result_to_get_list_result(result) -> List[Any]:
+def convert_list_images_result_to_get_list_result(result) -> list[Any]:
   """Converts a listImages result to something getList can return."""
   if 'images' not in result:
     return []
   return [_convert_image_for_get_list_result(i) for i in result['images']]
 
 
-def _convert_asset_for_get_list_result(asset) -> Dict[str, Any]:
+def _convert_asset_for_get_list_result(asset) -> dict[str, Any]:
   """Converts an EarthEngineAsset to the format returned by getList."""
   result = _convert_dict(
       asset, {
@@ -480,7 +480,7 @@ def _convert_asset_for_get_list_result(asset) -> Dict[str, Any]:
   return result
 
 
-def _convert_image_for_get_list_result(asset) -> Dict[str, Any]:
+def _convert_image_for_get_list_result(asset) -> dict[str, Any]:
   """Converts an Image to the format returned by getList."""
   result = _convert_dict(
       asset, {
@@ -531,7 +531,7 @@ def convert_asset_id_to_asset_name(asset_id: str) -> str:
     return 'projects/earthengine-public/assets/{}'.format(asset_id)
 
 
-def split_asset_name(asset_name: str) -> Tuple[str, str]:
+def split_asset_name(asset_name: str) -> tuple[str, str]:
   """Splits an asset name into the parent and ID parts.
 
   Args:
@@ -556,7 +556,7 @@ def convert_task_id_to_operation_name(task_id: str) -> str:
   return 'projects/{}/operations/{}'.format(_cloud_api_user_project, task_id)
 
 
-def convert_params_to_image_manifest(params: Dict[str, Any]) -> Dict[str, Any]:
+def convert_params_to_image_manifest(params: dict[str, Any]) -> dict[str, Any]:
   """Converts params to an ImageManifest for ingestion."""
   return _convert_dict(
       params, {
@@ -566,7 +566,7 @@ def convert_params_to_image_manifest(params: Dict[str, Any]) -> Dict[str, Any]:
       retain_keys=True)
 
 
-def convert_params_to_table_manifest(params: Dict[str, Any]) -> Dict[str, Any]:
+def convert_params_to_table_manifest(params: dict[str, Any]) -> dict[str, Any]:
   """Converts params to a TableManifest for ingestion."""
   return _convert_dict(
       params, {
@@ -576,7 +576,7 @@ def convert_params_to_table_manifest(params: Dict[str, Any]) -> Dict[str, Any]:
       retain_keys=True)
 
 
-def convert_tilesets_to_one_platform_tilesets(tilesets: List[Any]) -> List[Any]:
+def convert_tilesets_to_one_platform_tilesets(tilesets: list[Any]) -> list[Any]:
   """Converts a tileset to a one platform representation of a tileset."""
   converted_tilesets = []
   for tileset in tilesets:
@@ -588,7 +588,7 @@ def convert_tilesets_to_one_platform_tilesets(tilesets: List[Any]) -> List[Any]:
   return converted_tilesets
 
 
-def convert_sources_to_one_platform_sources(sources: List[Any]) -> List[Any]:
+def convert_sources_to_one_platform_sources(sources: list[Any]) -> list[Any]:
   """Converts the sources to one platform representation of sources."""
   converted_sources = []
   for source in sources:
@@ -607,7 +607,7 @@ def convert_sources_to_one_platform_sources(sources: List[Any]) -> List[Any]:
   return converted_sources
 
 
-def encode_number_as_cloud_value(number: float) -> Dict[str, Union[float, str]]:
+def encode_number_as_cloud_value(number: float) -> dict[str, Union[float, str]]:
   # Numeric values in constantValue-style nodes end up stored in doubles. If the
   # input is an integer that loses precision as a double, use the int64 slot
   # ("integerValue") in ValueNode.
@@ -617,7 +617,7 @@ def encode_number_as_cloud_value(number: float) -> Dict[str, Union[float, str]]:
     return {'constantValue': number}
 
 
-def convert_algorithms(algorithms) -> Dict[str, Any]:
+def convert_algorithms(algorithms) -> dict[str, Any]:
   """Converts a ListAlgorithmsResult to the internal format.
 
   The internal code expects a dict mapping each algorithm's name to a dict
@@ -645,7 +645,7 @@ def convert_algorithms(algorithms) -> Dict[str, Any]:
   return dict(_convert_algorithm(algorithm) for algorithm in algs)
 
 
-def _convert_algorithm(algorithm: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
+def _convert_algorithm(algorithm: dict[str, Any]) -> tuple[str, dict[str, Any]]:
   """Converts an Algorithm to the internal format."""
   # Strip leading 'algorithms/' from the name.
   algorithm_name = algorithm['name'][11:]
@@ -669,11 +669,11 @@ def _convert_algorithm(algorithm: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
 
 
 def _convert_algorithm_arguments(
-    args: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    args: list[dict[str, Any]]) -> list[dict[str, Any]]:
   return [_convert_algorithm_argument(arg) for arg in args]
 
 
-def _convert_algorithm_argument(arg: Dict[str, Any]) -> Dict[str, Any]:
+def _convert_algorithm_argument(arg: dict[str, Any]) -> dict[str, Any]:
   return _convert_dict(
       arg, {
           'argumentName': 'name',
@@ -738,7 +738,7 @@ def convert_to_table_file_format(format_str: Optional[str]) -> str:
     return format_str
 
 
-def convert_to_band_list(bands: Union[List[str], None, str]) -> List[str]:
+def convert_to_band_list(bands: Union[list[str], None, str]) -> list[str]:
   """Converts a band list, possibly as CSV, to a real list of bands.
 
   Args:
@@ -758,7 +758,7 @@ def convert_to_band_list(bands: Union[List[str], None, str]) -> List[str]:
     raise ee_exception.EEException('Invalid band list ' + bands)
 
 
-def convert_to_visualization_options(params: Dict[str, Any]) -> Dict[str, Any]:
+def convert_to_visualization_options(params: dict[str, Any]) -> dict[str, Any]:
   """Extracts a VisualizationOptions from a param dict.
 
   Args:
@@ -821,14 +821,14 @@ def convert_to_visualization_options(params: Dict[str, Any]) -> Dict[str, Any]:
   return result
 
 
-def _convert_csv_numbers_to_list(value: str) -> List[float]:
+def _convert_csv_numbers_to_list(value: str) -> list[float]:
   """Converts a string containing CSV numbers to a list."""
   if not value:
     return []
   return [float(x) for x in value.split(',')]
 
 
-def convert_operation_to_task(operation: Dict[str, Any]) -> Dict[str, Any]:
+def convert_operation_to_task(operation: dict[str, Any]) -> dict[str, Any]:
   """Converts an Operation to a legacy Task."""
   result = _convert_dict(
       operation['metadata'], {
@@ -864,7 +864,7 @@ def _convert_operation_state_to_task_state(state: str) -> str:
       }, 'UNKNOWN')
 
 
-def convert_iam_policy_to_acl(policy: Dict[str, Any])  -> Dict[str, Any]:
+def convert_iam_policy_to_acl(policy: dict[str, Any])  -> dict[str, Any]:
   """Converts an IAM Policy proto to the legacy ACL format."""
   bindings = {
       binding['role']: binding.get('members', [])
@@ -884,7 +884,7 @@ def convert_iam_policy_to_acl(policy: Dict[str, Any])  -> Dict[str, Any]:
   return result
 
 
-def convert_acl_to_iam_policy(acl: Dict[str, Any]) -> Dict[str, Any]:
+def convert_acl_to_iam_policy(acl: dict[str, Any]) -> dict[str, Any]:
   """Converts the legacy ACL format to an IAM Policy proto."""
   owners = acl.get('owners', [])
   readers = acl.get('readers', [])
@@ -903,7 +903,7 @@ def convert_acl_to_iam_policy(acl: Dict[str, Any]) -> Dict[str, Any]:
 
 def convert_to_grid_dimensions(
     dimensions: Union[float, Sequence[float]]
-) -> Dict[str, float]:
+) -> dict[str, float]:
   """Converts an input value to GridDimensions.
 
   Args:
