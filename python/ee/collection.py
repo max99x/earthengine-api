@@ -6,12 +6,12 @@ This class is never intended to be instantiated by the user.
 from __future__ import annotations
 
 import datetime
-from typing import Any, Callable, Dict, Optional, Type, Union
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, Union
 
 from ee import _arg_types
+from ee import _ret_types
 from ee import _utils
 from ee import apifunction
-from ee import computedobject
 from ee import confusionmatrix
 from ee import deprecation
 from ee import dictionary
@@ -25,6 +25,14 @@ from ee import filter as ee_filter
 from ee import function
 from ee import geometry as ee_geometry
 from ee import image
+from ee import imagecollection
+
+# TODO: Remove this type aliase and replace with typing.Self once
+# Python 3.11 is the minimum version.
+SelfCollection = Union[
+    imagecollection.ImageCollection,
+    featurecollection.FeatureCollection,
+]
 
 
 class Collection(element.Element):
@@ -116,7 +124,7 @@ class Collection(element.Element):
 
   def aggregate_first(
       self, property: _arg_types.String  # pylint: disable=redefined-builtin
-  ) -> computedobject.ComputedObject:
+  ) -> _ret_types.ComputedObject:
     """Returns the first value of the selected property.
 
     Aggregates over a given property of the objects in a collection, calculating
@@ -151,7 +159,7 @@ class Collection(element.Element):
 
   def aggregate_max(
       self, property: _arg_types.String  # pylint: disable=redefined-builtin
-  ) -> computedobject.ComputedObject:
+  ) -> _ret_types.ComputedObject:
     """Returns the maximum value of the selected property.
 
     Aggregates over a given property of the objects in a collection, calculating
@@ -182,7 +190,7 @@ class Collection(element.Element):
 
   def aggregate_min(
       self, property: _arg_types.String  # pylint: disable=redefined-builtin
-  ) -> computedobject.ComputedObject:
+  ) -> _ret_types.ComputedObject:
     """Returns the minimum value of the selected property.
 
     Aggregates over a given property of the objects in a collection, calculating
@@ -423,7 +431,7 @@ class Collection(element.Element):
         'Collection.errorMatrix', self, actual, predicted, order
     )
 
-  def filter(self, new_filter: Union[str, ee_filter.Filter]) -> Any:
+  def filter(self, new_filter: Union[str, ee_filter.Filter]) -> SelfCollection:
     """Apply a filter to this collection.
 
     Args:
@@ -441,7 +449,7 @@ class Collection(element.Element):
   @deprecation.CanUseDeprecated
   def filterMetadata(
       self, name: str, operator: str, value: Union[int, str]
-  ) -> Any:
+  ) -> SelfCollection:
     """Shortcut to add a metadata filter to a collection.
 
     This is equivalent to self.filter(Filter().metadata(...)).
@@ -462,7 +470,7 @@ class Collection(element.Element):
 
   def filterBounds(
       self, geometry: Union[Dict[str, Any], ee_geometry.Geometry]
-  ) -> Any:
+  ) -> SelfCollection:
     """Shortcut to add a geometry filter to a collection.
 
     Items in the collection with a footprint that fails to intersect
@@ -491,7 +499,7 @@ class Collection(element.Element):
       end: Optional[
           Union[datetime.datetime, ee_date.Date, int, str, Any]
       ] = None,
-  ) -> Any:
+  ) -> SelfCollection:
     """Shortcut to filter a collection with a date range.
 
     Items in the collection with a system:time_start property that doesn't
@@ -510,7 +518,7 @@ class Collection(element.Element):
     """
     return self.filter(ee_filter.Filter.date(start, end))
 
-  def first(self) -> element.Element:
+  def first(self) -> _ret_types.ComputedObject:
     """Returns the first entry from a given collection."""
 
     return apifunction.ApiFunction.call_('Collection.first', self)
@@ -644,7 +652,7 @@ class Collection(element.Element):
       self,
       algorithm: Callable[[Any], Any],
       dropNulls: Optional[bool] = None,  # pylint: disable=invalid-name
-  ) -> Any:
+  ) -> SelfCollection:
     """Maps an algorithm over a collection.
 
     Args:
@@ -798,7 +806,7 @@ class Collection(element.Element):
 
   # TODO(user): Make ascending default to True
   @_utils.accept_opt_prefix('opt_ascending')
-  def sort(self, prop: str, ascending: Optional[bool] = None) -> Any:
+  def sort(self, prop: str, ascending: Optional[bool] = None) -> SelfCollection:
     """Sort a collection by the specified property.
 
     Args:
